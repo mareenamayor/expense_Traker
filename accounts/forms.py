@@ -17,29 +17,21 @@ class RegisterForm(forms.Form):
     )
 
     def clean_username(self):
-        """
-        Validate that the username is not already taken in our MongoDB 'users' collection.
-        """
+        # Check if username is already taken
         username = self.cleaned_data.get('username')
-        # Native MongoDB Query: find_one finds the first document matching the query
         if db.users.find_one({'username': username}):
             raise forms.ValidationError("This username is already taken.")
         return username
 
     def clean_email(self):
-        """
-        Validate that the email address is unique in our MongoDB 'users' collection.
-        """
+        # Check if email is already taken
         email = self.cleaned_data.get('email')
-        # Native MongoDB Query
         if db.users.find_one({'email': email}):
             raise forms.ValidationError("A user with this email already exists.")
         return email
 
     def clean(self):
-        """
-        Cross-field validation to make sure password and confirm_password match.
-        """
+        # Make sure password and confirm_password match
         cleaned_data = super().clean()
         password = cleaned_data.get('password')
         confirm_password = cleaned_data.get('confirm_password')

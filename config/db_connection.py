@@ -1,14 +1,12 @@
 import pymongo
 from django.conf import settings
 
-# Initialize the MongoDB client.
-# settings.MONGO_URI is loaded from Django settings, which reads from the .env file.
+# Connect to MongoDB using the URI from settings
 client = pymongo.MongoClient(settings.MONGO_URI)
 
 try:
-    # client.get_default_database() automatically extracts the database name from the MONGO_URI string.
-    # E.g., from "mongodb://localhost:27017/expense_tracker_db", it extracts "expense_tracker_db".
+    # Get the default database specified in the URI path
     db = client.get_default_database()
 except Exception:
-    # Fallback if the connection URI doesn't specify a database name path.
+    # Fallback if no database name is in the URI
     db = client['expense_tracker_db']

@@ -7,28 +7,21 @@ from .forms import RegisterForm, LoginForm
 from .decorators import user_login_required
 
 def register_view(request):
-    """
-    Handles user registration.
-    If GET, renders the signup page with a clean form.
-    If POST, validates form data, hashes the password, inserts a new user document
-    into MongoDB 'users' collection, and redirects to login.
-    """
-    # Redirect logged-in users away from signup page
+    # Handle user signup
     if 'user_id' in request.session:
         return redirect('dashboard')
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            # Clean data is returned as standard Python types after validation
             username = form.cleaned_data['username']
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
-            # Hash the password securely using Django's default pbkdf2 algorithm
+            # Securely hash password
             hashed_password = make_password(password)
 
-            # Construct the MongoDB document
+            # Create user document
             user_document = {
                 'username': username,
                 'email': email,
@@ -36,8 +29,7 @@ def register_view(request):
                 'created_at': datetime.utcnow()
             }
 
-            # Insert into MongoDB 'users' collection
-            # Native MongoDB operation: insert_one()
+            # Insert into database
             db.users.insert_one(user_document)
 
             messages.success(request, "Registration successful! You can now log in.")
@@ -49,12 +41,7 @@ def register_view(request):
 
 
 def login_view(request):
-    """
-    Handles user login.
-    If GET, renders the login page.
-    If POST, queries MongoDB by email, checks the hashed password,
-    creates session cookies, and redirects to dashboard.
-    """
+    # Handle user login
     if 'user_id' in request.session:
         return redirect('dashboard')
 
@@ -64,15 +51,11 @@ def login_view(request):
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
 
-            # Query MongoDB 'users' collection for this email
-            # Native MongoDB operation: find_one()
+            # Find user in database
             user = db.users.find_one({'email': email})
 
-            # Check if user exists and password is correct
-            # check_password compares raw string with securely salted PBKDF2 hash
+            # Verify password and set up session
             if user and check_password(password, user['password_hash']):
-                # Set session variables to log the user in
-                # We convert ObjectId to string since sessions require serializable JSON data
                 request.session['user_id'] = str(user['_id'])
                 request.session['username'] = user['username']
 
@@ -87,10 +70,7 @@ def login_view(request):
 
 
 def logout_view(request):
-    """
-    Logs the user out by clearing their session data and redirects to login.
-    """
-    # flush() clears the session data and deletes the session cookie from the database
+    # Clear session and redirect to login page
     request.session.flush()
     messages.info(request, "You have been successfully logged out.")
     return redirect('login')
@@ -98,7 +78,5 @@ def logout_view(request):
 
 @user_login_required
 def temp_dashboard_view(request):
-    """
-    A temporary dashboard landing page to verify successful login and session storage.
-    """
+    # Show temporary dashboard to test sessions
     return render(request, 'accounts/temp_dashboard.html')

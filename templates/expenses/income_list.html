@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}My Income - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-1">Income Streams</h2>
+            <p class="text-muted mb-0">Record and track your incoming revenues</p>
+        </div>
+        <a href="{% url 'income_create' %}" class="btn btn-custom-primary px-4 py-2 shadow-sm">
+            <i class="bi bi-plus-circle me-1"></i> Add Income
+        </a>
+    </div>
+
+    <!-- Search Bar Form -->
+    <div class="col-12 mb-4">
+        <form method="GET" class="card card-premium shadow p-3 bg-white">
+            <div class="input-group">
+                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                <input type="text" name="q" value="{{ query }}" class="form-control border-start-0 ps-0" placeholder="Search by source or description...">
+                <button type="submit" class="btn btn-custom-primary px-4">Search</button>
+                {% if query %}
+                    <a href="{% url 'income_list' %}" class="btn btn-outline-secondary px-3 d-flex align-items-center">Clear</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Income Table list -->
+    <div class="col-12">
+        <div class="card card-premium shadow p-0">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-premium align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-4 py-3" style="width: 130px;">Date</th>
+                                <th class="py-3">Source</th>
+                                <th class="py-3">Category</th>
+                                <th class="py-3">Description</th>
+                                <th class="py-3 text-end">Amount</th>
+                                <th class="px-4 py-3 text-end" style="width: 150px;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if page_obj %}
+                                {% for income in page_obj %}
+                                    <tr>
+                                        <td class="px-4 py-3 text-secondary fw-semibold">
+                                            {{ income.date|date:"Y-m-d" }}
+                                        </td>
+                                        <td class="py-3 fw-bold text-dark">{{ income.source }}</td>
+                                        <td class="py-3">
+                                            <span class="badge text-dark px-2.5 py-1.5 rounded-pill border" style="background-color: {{ income.category.color }}33; border-color: {{ income.category.color }};">
+                                                <span class="d-inline-block rounded-circle me-1" style="width: 8px; height: 8px; background-color: {{ income.category.color }};"></span>
+                                                {{ income.category.name }}
+                                            </span>
+                                        </td>
+                                        <td class="py-3 text-muted text-truncate" style="max-width: 250px;">
+                                            {{ income.description|default:"-" }}
+                                        </td>
+                                        <td class="py-3 text-end fw-bold text-success">
+                                            ${{ income.amount|floatformat:2 }}
+                                        </td>
+                                        <td class="px-4 py-3 text-end">
+                                            <a href="{% url 'income_update' income.id %}" class="btn btn-outline-secondary btn-sm me-1 rounded-circle p-2" title="Edit">
+                                                <i class="bi bi-pencil" style="font-size: 0.9rem; width: 14px; height: 14px; display: inline-block; line-height: 14px;"></i>
+                                            </a>
+                                            <a href="{% url 'income_delete' income.id %}" class="btn btn-outline-danger btn-sm rounded-circle p-2" title="Delete">
+                                                <i class="bi bi-trash" style="font-size: 0.9rem; width: 14px; height: 14px; display: inline-block; line-height: 14px;"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-5 text-secondary">
+                                        <i class="bi bi-cash-stack fs-1 text-muted d-block mb-3"></i>
+                                        <p class="mb-1 fw-medium">No Income Records Found</p>
+                                        {% if query %}
+                                            <p class="small text-muted mb-0">No matches found for your search term.</p>
+                                        {% else %}
+                                            <p class="small text-muted mb-3">You haven't recorded any income streams yet.</p>
+                                            <a href="{% url 'income_create' %}" class="btn btn-sm btn-custom-primary">
+                                                Add Income Record
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Pagination Controls -->
+            {% if page_obj.has_other_pages %}
+                <div class="card-footer bg-white border-top d-flex justify-content-between align-items-center px-4 py-3">
+                    <span class="text-muted small">
+                        Showing page <strong>{{ page_obj.number }}</strong> of <strong>{{ page_obj.paginator.num_pages }}</strong>
+                    </span>
+                    <nav aria-label="Income page navigation">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                                {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
