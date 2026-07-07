@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Log In - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-container">
+        <div class="card card-premium shadow p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-box-arrow-in-right text-primary fs-1"></i>
+                <h2 class="mt-2 fw-bold text-dark">Welcome Back</h2>
+                <p class="text-muted">Sign in to track your expenses</p>
+            </div>
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger shadow-sm py-2 mb-3">
+                    {% for error in form.non_field_errors %}
+                        <div class="small"><i class="bi bi-exclamation-octagon-fill me-1"></i> {{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="POST" action="{% url 'login' %}" novalidate>
+                {% csrf_token %}
+                
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-secondary">
+                            {{ field.label }}
+                        </label>
+                        {{ field }}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-x-circle-fill me-1" style="font-size: 0.8rem;"></i> {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-custom-primary py-2.5 fs-5 shadow-sm">
+                        Log In
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <span class="text-secondary small">Don't have an account? <a href="{% url 'register' %}" class="text-primary fw-medium text-decoration-none">Sign Up</a></span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

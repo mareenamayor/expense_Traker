@@ -1,0 +1,33 @@
+/* Custom global stylesheet for ExpenseTracker */
+
+/* Smooth transitions for links and buttons */
+a, button, .btn {
+    transition: all 0.25s ease-in-out;
+}
+
+/* Glassmorphism card effect */
+.card-premium {
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+/* Custom form card centering */
+.auth-container {
+    max-width: 450px;
+    margin: 5% auto;
+}
+
+/* Form inputs styling adjustment */
+.form-control:focus {
+    border-color: #4a4e69;
+    box-shadow: 0 0 0 0.2rem rgba(74, 78, 105, 0.25);
+}
+
+/* Table styling fixes */
+.table-premium th {
+    font-weight: 600;
+    color: #4a4e69;
+    border-bottom: 2px solid #e2e8f0;
+}
