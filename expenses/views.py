@@ -14,6 +14,8 @@ def category_list_view(request):
     # Fetch and list user categories
     user_id = ObjectId(request.session['user_id'])
     categories = list(db.categories.find({'user_id': user_id}).sort('name', 1))
+    for cat in categories:
+        cat['id'] = str(cat['_id'])
     return render(request, 'expenses/category_list.html', {'categories': categories})
 
 
@@ -141,6 +143,7 @@ def income_list_view(request):
     category_map = {str(cat['_id']): cat for cat in categories}
     
     for inc in incomes:
+        inc['id'] = str(inc['_id'])
         cat_id_str = str(inc.get('category_id', ''))
         inc['category'] = category_map.get(cat_id_str, {
             'name': 'Uncategorized',
@@ -296,6 +299,7 @@ def expense_list_view(request):
     category_map = {str(cat['_id']): cat for cat in categories}
     
     for exp in expenses:
+        exp['id'] = str(exp['_id'])
         cat_id_str = str(exp.get('category_id', ''))
         exp['category'] = category_map.get(cat_id_str, {
             'name': 'Uncategorized',
