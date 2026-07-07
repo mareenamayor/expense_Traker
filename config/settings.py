@@ -68,6 +68,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'expenses.context_processors.currency_context',
             ],
         },
     },
@@ -126,3 +127,6 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 
 # MongoDB Connection Configuration
 MONGO_URI = os.getenv('MONGO_URI', 'mongodb://localhost:27017/expense_tracker_db')
+
+# Global Currency Symbol configuration
+CURRENCY_SYMBOL = 'Rs.'

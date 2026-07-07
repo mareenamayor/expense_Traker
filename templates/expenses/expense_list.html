@@ -62,7 +62,7 @@
                                             {{ expense.description|default:"-" }}
                                         </td>
                                         <td class="py-3 text-end fw-bold text-danger">
-                                            -${{ expense.amount|floatformat:2 }}
+                                            -{{ CURRENCY_SYMBOL }}{{ expense.amount|floatformat:2 }}
                                         </td>
                                         <td class="px-4 py-3 text-end">
                                             <a href="{% url 'expense_update' expense.id %}" class="btn btn-outline-secondary btn-sm me-1 rounded-circle p-2" title="Edit">

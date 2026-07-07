@@ -1,4 +1,5 @@
 import calendar
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.paginator import Paginator
@@ -185,7 +186,7 @@ def income_create_view(request):
             }
             
             db.income.insert_one(income_document)
-            messages.success(request, f"Income of ${amount:.2f} added successfully!")
+            messages.success(request, f"Income of {settings.CURRENCY_SYMBOL}{amount:.2f} added successfully!")
             return redirect('income_list')
     else:
         form = IncomeForm(user_id=user_id)
@@ -340,7 +341,7 @@ def expense_create_view(request):
             }
             
             db.expenses.insert_one(expense_document)
-            messages.success(request, f"Expense of ${amount:.2f} to '{payee}' added successfully!")
+            messages.success(request, f"Expense of {settings.CURRENCY_SYMBOL}{amount:.2f} to '{payee}' added successfully!")
             return redirect('expense_list')
     else:
         form = ExpenseForm(user_id=user_id)

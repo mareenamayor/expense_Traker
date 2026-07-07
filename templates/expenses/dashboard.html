@@ -19,7 +19,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Total Income</span>
-                    <h3 class="fw-bold text-success mb-0">${{ total_income|floatformat:2 }}</h3>
+                    <h3 class="fw-bold text-success mb-0">{{ CURRENCY_SYMBOL }}{{ total_income|floatformat:2 }}</h3>
                 </div>
                 <div class="bg-success-subtle text-success p-3 rounded-circle d-flex align-items-center">
                     <i class="bi bi-wallet2 fs-4" style="line-height: 1;"></i>
@@ -34,7 +34,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Total Expenses</span>
-                    <h3 class="fw-bold text-danger mb-0">${{ total_expense|floatformat:2 }}</h3>
+                    <h3 class="fw-bold text-danger mb-0">{{ CURRENCY_SYMBOL }}{{ total_expense|floatformat:2 }}</h3>
                 </div>
                 <div class="bg-danger-subtle text-danger p-3 rounded-circle d-flex align-items-center">
                     <i class="bi bi-credit-card fs-4" style="line-height: 1;"></i>
@@ -49,7 +49,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Net Balance</span>
-                    <h3 class="fw-bold {% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">${{ balance|floatformat:2 }}</h3>
+                    <h3 class="fw-bold {% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">{{ CURRENCY_SYMBOL }}{{ balance|floatformat:2 }}</h3>
                 </div>
                 <div class="{% if balance >= 0 %}bg-primary-subtle text-primary{% else %}bg-warning-subtle text-warning{% endif %} p-3 rounded-circle d-flex align-items-center">
                     <i class="bi bi-piggy-bank fs-4" style="line-height: 1;"></i>
@@ -64,7 +64,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <div>
                     <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Today's Expenses</span>
-                    <h3 class="fw-bold text-dark mb-0">${{ today_expense|floatformat:2 }}</h3>
+                    <h3 class="fw-bold text-dark mb-0">{{ CURRENCY_SYMBOL }}{{ today_expense|floatformat:2 }}</h3>
                 </div>
                 <div class="bg-dark-subtle text-dark p-3 rounded-circle d-flex align-items-center">
                     <i class="bi bi-calendar-event fs-4" style="line-height: 1;"></i>
@@ -143,7 +143,7 @@
                             </div>
                             <div class="text-end">
                                 <span class="fw-bold {% if tx.type == 'income' %}text-success{% else %}text-danger{% endif %}">
-                                    {% if tx.type == 'income' %}+{% else %}-{% endif %}${{ tx.amount|floatformat:2 }}
+                                    {% if tx.type == 'income' %}+{% else %}-{% endif %}{{ CURRENCY_SYMBOL }}{{ tx.amount|floatformat:2 }}
                                 </span>
                             </div>
                         </div>

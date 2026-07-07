@@ -62,7 +62,7 @@
                                             {{ income.description|default:"-" }}
                                         </td>
                                         <td class="py-3 text-end fw-bold text-success">
-                                            ${{ income.amount|floatformat:2 }}
+                                            {{ CURRENCY_SYMBOL }}{{ income.amount|floatformat:2 }}
                                         </td>
                                         <td class="px-4 py-3 text-end">
                                             <a href="{% url 'income_update' income.id %}" class="btn btn-outline-secondary btn-sm me-1 rounded-circle p-2" title="Edit">

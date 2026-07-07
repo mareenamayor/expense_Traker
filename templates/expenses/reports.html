@@ -72,19 +72,19 @@
     <div class="col-md-4">
         <div class="card card-premium shadow p-3 border-0 bg-white">
             <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Period Income</span>
-            <h4 class="fw-bold text-success mb-0">${{ total_income|floatformat:2 }}</h4>
+            <h4 class="fw-bold text-success mb-0">{{ CURRENCY_SYMBOL }}{{ total_income|floatformat:2 }}</h4>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card card-premium shadow p-3 border-0 bg-white">
             <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Period Expenses</span>
-            <h4 class="fw-bold text-danger mb-0">${{ total_expense|floatformat:2 }}</h4>
+            <h4 class="fw-bold text-danger mb-0">{{ CURRENCY_SYMBOL }}{{ total_expense|floatformat:2 }}</h4>
         </div>
     </div>
     <div class="col-md-4">
         <div class="card card-premium shadow p-3 border-0 bg-white">
             <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Period Savings</span>
-            <h4 class="fw-bold {% if net_savings >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">${{ net_savings|floatformat:2 }}</h4>
+            <h4 class="fw-bold {% if net_savings >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">{{ CURRENCY_SYMBOL }}{{ net_savings|floatformat:2 }}</h4>
         </div>
     </div>
 </div>
@@ -118,7 +118,7 @@
                                             {{ inc.category.name }}
                                         </span>
                                     </td>
-                                    <td class="text-end fw-bold text-success">${{ inc.amount|floatformat:2 }}</td>
+                                    <td class="text-end fw-bold text-success">{{ CURRENCY_SYMBOL }}{{ inc.amount|floatformat:2 }}</td>
                                 </tr>
                             {% endfor %}
                         {% else %}
@@ -161,7 +161,7 @@
                                             {{ exp.category.name }}
                                         </span>
                                     </td>
-                                    <td class="text-end fw-bold text-danger">-${{ exp.amount|floatformat:2 }}</td>
+                                    <td class="text-end fw-bold text-danger">-{{ CURRENCY_SYMBOL }}{{ exp.amount|floatformat:2 }}</td>
                                 </tr>
                             {% endfor %}
                         {% else %}
