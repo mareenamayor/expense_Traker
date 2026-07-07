@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('', views.dashboard_view, name='dashboard'),
+    path('reports/', views.reports_view, name='reports'),
+    
     # Category CRUD Routes
     path('categories/', views.category_list_view, name='category_list'),
     path('categories/create/', views.category_create_view, name='category_create'),

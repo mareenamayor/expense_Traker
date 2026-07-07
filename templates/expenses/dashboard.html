@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Expense Tracker{% endblock %}
+
+{% block content %}
+<!-- Welcome Banner -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="fw-bold text-dark mb-1">Financial Dashboard</h2>
+        <p class="text-muted">Welcome back, {{ request.session.username }}! Here is your financial overview.</p>
+    </div>
+</div>
+
+<!-- KPI Summary Cards -->
+<div class="row g-4 mb-4">
+    <!-- Total Income Card -->
+    <div class="col-md-3">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Total Income</span>
+                    <h3 class="fw-bold text-success mb-0">${{ total_income|floatformat:2 }}</h3>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-circle d-flex align-items-center">
+                    <i class="bi bi-wallet2 fs-4" style="line-height: 1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Expenses Card -->
+    <div class="col-md-3">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Total Expenses</span>
+                    <h3 class="fw-bold text-danger mb-0">${{ total_expense|floatformat:2 }}</h3>
+                </div>
+                <div class="bg-danger-subtle text-danger p-3 rounded-circle d-flex align-items-center">
+                    <i class="bi bi-credit-card fs-4" style="line-height: 1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Net Balance Card -->
+    <div class="col-md-3">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Net Balance</span>
+                    <h3 class="fw-bold {% if balance >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">${{ balance|floatformat:2 }}</h3>
+                </div>
+                <div class="{% if balance >= 0 %}bg-primary-subtle text-primary{% else %}bg-warning-subtle text-warning{% endif %} p-3 rounded-circle d-flex align-items-center">
+                    <i class="bi bi-piggy-bank fs-4" style="line-height: 1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Today's Expenses Card -->
+    <div class="col-md-3">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <div class="d-flex align-items-center justify-content-between">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Today's Expenses</span>
+                    <h3 class="fw-bold text-dark mb-0">${{ today_expense|floatformat:2 }}</h3>
+                </div>
+                <div class="bg-dark-subtle text-dark p-3 rounded-circle d-flex align-items-center">
+                    <i class="bi bi-calendar-event fs-4" style="line-height: 1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Grid -->
+<div class="row g-4 mb-4">
+    <!-- Chart Column (Left) -->
+    <div class="col-lg-8">
+        <div class="row g-4">
+            <!-- 6-Month Income vs Expense Bar Chart -->
+            <div class="col-12">
+                <div class="card card-premium shadow p-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-4"><i class="bi bi-bar-chart-fill me-2 text-primary"></i>Income vs Expenses (Last 6 Months)</h5>
+                    <div style="height: 300px; position: relative;">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daily Spending Trend Line Chart -->
+            <div class="col-md-6">
+                <div class="card card-premium shadow p-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-4"><i class="bi bi-graph-up me-2 text-dark"></i>Spending Trend (This Month)</h5>
+                    <div style="height: 230px; position: relative;">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Expense Categories Pie Chart -->
+            <div class="col-md-6">
+                <div class="card card-premium shadow p-4 bg-white">
+                    <h5 class="fw-bold text-dark mb-4"><i class="bi bi-pie-chart-fill me-2 text-warning"></i>Expenses by Category (This Month)</h5>
+                    <div style="height: 230px; position: relative;">
+                        <canvas id="pieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Transactions & Action Items Column (Right) -->
+    <div class="col-lg-4">
+        <div class="card card-premium shadow p-4 bg-white h-100">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-clock-history me-2 text-secondary"></i>Recent Activity</h5>
+                <a href="{% url 'expense_list' %}" class="small text-decoration-none">View All</a>
+            </div>
+
+            <div class="list-group list-group-flush">
+                {% if recent_transactions %}
+                    {% for tx in recent_transactions %}
+                        <div class="list-group-item px-0 py-3 border-bottom d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle me-3 d-flex align-items-center justify-content-center" 
+                                     style="width: 40px; height: 40px; background-color: {{ tx.category.color }}22;">
+                                    {% if tx.type == 'income' %}
+                                        <i class="bi bi-arrow-up-right text-success" style="font-size: 1.1rem;"></i>
+                                    {% else %}
+                                        <i class="bi bi-arrow-down-left text-danger" style="font-size: 1.1rem;"></i>
+                                    {% endif %}
+                                </div>
+                                <div style="max-width: 160px;">
+                                    <h6 class="mb-0 fw-bold text-dark text-truncate">
+                                        {% if tx.type == 'income' %}{{ tx.source }}{% else %}{{ tx.payee }}{% endif %}
+                                    </h6>
+                                    <span class="text-muted small d-block">
+                                        {{ tx.category.name }} &bull; {{ tx.date|date:"M d" }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <span class="fw-bold {% if tx.type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if tx.type == 'income' %}+{% else %}-{% endif %}${{ tx.amount|floatformat:2 }}
+                                </span>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 text-secondary">
+                        <i class="bi bi-journals fs-1 text-muted d-block mb-3"></i>
+                        <p class="mb-0 fw-medium">No Recent Transactions</p>
+                        <p class="small text-muted mb-0">Record some entries to see them listed here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Output data safely using Django json_script filter -->
+{{ pie_labels|json_script:"pie-labels" }}
+{{ pie_data|json_script:"pie-data" }}
+{{ pie_colors|json_script:"pie-colors" }}
+
+{{ bar_labels|json_script:"bar-labels" }}
+{{ bar_income|json_script:"bar-income" }}
+{{ bar_expense|json_script:"bar-expense" }}
+
+{{ line_labels|json_script:"line-labels" }}
+{{ line_data|json_script:"line-data" }}
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js library CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Parse raw JSON script content securely
+        const pieLabels = JSON.parse(document.getElementById('pie-labels').textContent);
+        const pieData = JSON.parse(document.getElementById('pie-data').textContent);
+        const pieColors = JSON.parse(document.getElementById('pie-colors').textContent);
+
+        const barLabels = JSON.parse(document.getElementById('bar-labels').textContent);
+        const barIncome = JSON.parse(document.getElementById('bar-income').textContent);
+        const barExpense = JSON.parse(document.getElementById('bar-expense').textContent);
+
+        const lineLabels = JSON.parse(document.getElementById('line-labels').textContent);
+        const lineData = JSON.parse(document.getElementById('line-data').textContent);
+
+        // 1. Pie Chart
+        if (pieData.length > 0) {
+            new Chart(document.getElementById('pieChart').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: pieLabels,
+                    datasets: [{
+                        data: pieData,
+                        backgroundColor: pieColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        } else {
+            // Draw visual placeholder if chart is empty
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            ctx.font = "14px 'Outfit'";
+            ctx.fillStyle = "#888888";
+            ctx.textAlign = "center";
+            ctx.fillText("No current month expenses recorded", 130, 115);
+        }
+
+        // 2. Bar Chart
+        new Chart(document.getElementById('barChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: barLabels,
+                datasets: [
+                    {
+                        label: 'Income',
+                        data: barIncome,
+                        backgroundColor: '#2ec4b6',
+                        borderRadius: 4
+                    },
+                    {
+                        label: 'Expense',
+                        data: barExpense,
+                        backgroundColor: '#e71d36',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 3. Line Chart
+        new Chart(document.getElementById('lineChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: lineLabels,
+                datasets: [{
+                    label: 'Daily Expense',
+                    data: lineData,
+                    borderColor: '#4a4e69',
+                    backgroundColor: '#4a4e6922',
+                    fill: true,
+                    tension: 0.3,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

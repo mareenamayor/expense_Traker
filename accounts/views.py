@@ -74,9 +74,3 @@ def logout_view(request):
     request.session.flush()
     messages.info(request, "You have been successfully logged out.")
     return redirect('login')
-
-
-@user_login_required
-def temp_dashboard_view(request):
-    # Show temporary dashboard to test sessions
-    return render(request, 'accounts/temp_dashboard.html')

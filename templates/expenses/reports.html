@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% block title %}Financial Reports - Expense Tracker{% endblock %}
+
+{% block content %}
+<!-- Header and Actions -->
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold text-dark mb-1">Financial Reports</h2>
+        <p class="text-muted mb-0">Generate, analyze, and filter transaction records</p>
+    </div>
+    <div class="col-md-4 text-end d-print-none">
+        <button onclick="window.print()" class="btn btn-outline-secondary px-4">
+            <i class="bi bi-printer me-1"></i> Print Report
+        </button>
+    </div>
+</div>
+
+<!-- Filters Form -->
+<div class="row mb-4 d-print-none">
+    <div class="col-12">
+        <div class="card card-premium shadow p-4 bg-white">
+            <form method="GET" action="{% url 'reports' %}" class="row g-3 align-items-end">
+                <!-- Preset Filter Selection -->
+                <div class="col-md-3">
+                    <label for="report_type" class="form-label fw-bold text-secondary small">Report Preset</label>
+                    <select name="report_type" id="report_type" class="form-select">
+                        <option value="custom" {% if report_type == 'custom' %}selected{% endif %}>Custom Range</option>
+                        <option value="monthly" {% if report_type == 'monthly' %}selected{% endif %}>Current Month</option>
+                        <option value="yearly" {% if report_type == 'yearly' %}selected{% endif %}>Current Year</option>
+                    </select>
+                </div>
+
+                <!-- Start Date -->
+                <div class="col-md-3 date-input-group">
+                    <label for="start_date" class="form-label fw-bold text-secondary small">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="{{ start_date }}" class="form-control" {% if report_type != 'custom' %}disabled{% endif %}>
+                </div>
+
+                <!-- End Date -->
+                <div class="col-md-3 date-input-group">
+                    <label for="end_date" class="form-label fw-bold text-secondary small">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="{{ end_date }}" class="form-control" {% if report_type != 'custom' %}disabled{% endif %}>
+                </div>
+
+                <!-- Category filter dropdown -->
+                <div class="col-md-3">
+                    <label for="category" class="form-label fw-bold text-secondary small">Category</label>
+                    <select name="category" id="category" class="form-select">
+                        <option value="">-- All Categories --</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_category == cat.id %}selected{% endif %}>
+                                {{ cat.name }} ({{ cat.type|title }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-custom-primary px-4">
+                        <i class="bi bi-funnel me-1"></i> Apply Filters
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Report Period Summary KPI -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Period Income</span>
+            <h4 class="fw-bold text-success mb-0">${{ total_income|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Period Expenses</span>
+            <h4 class="fw-bold text-danger mb-0">${{ total_expense|floatformat:2 }}</h4>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-premium shadow p-3 border-0 bg-white">
+            <span class="text-muted small fw-semibold text-uppercase d-block mb-1">Period Savings</span>
+            <h4 class="fw-bold {% if net_savings >= 0 %}text-primary{% else %}text-warning{% endif %} mb-0">${{ net_savings|floatformat:2 }}</h4>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Data Grid Split -->
+<div class="row g-4">
+    <!-- Income Breakdown (Left) -->
+    <div class="col-lg-6">
+        <div class="card card-premium shadow p-4 bg-white h-100">
+            <h5 class="fw-bold text-success mb-4 border-bottom pb-2">
+                <i class="bi bi-arrow-up-right-circle me-2"></i>Income Records ({{ incomes|length }})
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Source</th>
+                            <th>Category</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if incomes %}
+                            {% for inc in incomes %}
+                                <tr>
+                                    <td class="text-secondary small">{{ inc.date|date:"Y-m-d" }}</td>
+                                    <td class="fw-bold text-dark">{{ inc.source }}</td>
+                                    <td>
+                                        <span class="badge text-dark small" style="background-color: {{ inc.category.color }}22; border: 1px solid {{ inc.category.color }};">
+                                            {{ inc.category.name }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-success">${{ inc.amount|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted small">
+                                    No matching income records in this period.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expenses Breakdown (Right) -->
+    <div class="col-lg-6">
+        <div class="card card-premium shadow p-4 bg-white h-100">
+            <h5 class="fw-bold text-danger mb-4 border-bottom pb-2">
+                <i class="bi bi-arrow-down-left-circle me-2"></i>Expense Records ({{ expenses|length }})
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Payee</th>
+                            <th>Category</th>
+                            <th class="text-end">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if expenses %}
+                            {% for exp in expenses %}
+                                <tr>
+                                    <td class="text-secondary small">{{ exp.date|date:"Y-m-d" }}</td>
+                                    <td class="fw-bold text-dark">{{ exp.payee }}</td>
+                                    <td>
+                                        <span class="badge text-dark small" style="background-color: {{ exp.category.color }}22; border: 1px solid {{ exp.category.color }};">
+                                            {{ exp.category.name }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end fw-bold text-danger">-${{ exp.amount|floatformat:2 }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted small">
+                                    No matching expense records in this period.
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Toggle start/end date enabled based on custom preset filter
+    document.addEventListener("DOMContentLoaded", function() {
+        const presetSelect = document.getElementById("report_type");
+        const startDateInput = document.getElementById("start_date");
+        const endDateInput = document.getElementById("end_date");
+
+        presetSelect.addEventListener("change", function() {
+            if (this.value === "custom") {
+                startDateInput.removeAttribute("disabled");
+                endDateInput.removeAttribute("disabled");
+            } else {
+                startDateInput.setAttribute("disabled", "true");
+                endDateInput.setAttribute("disabled", "true");
+            }
+        });
+    });
+</script>
+{% endblock %}
