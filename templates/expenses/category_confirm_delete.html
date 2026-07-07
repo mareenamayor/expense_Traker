@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category - Expense Tracker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card card-premium shadow p-5 border-danger text-center">
+            <div class="text-danger mb-4">
+                <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+            </div>
+            
+            <h2 class="fw-bold text-dark">Delete Category?</h2>
+            <p class="text-secondary mt-3">
+                Are you sure you want to delete the category: <strong>{{ category.name }}</strong> ({{ category.type|title }})?
+            </p>
+
+            <div class="alert alert-warning text-start my-4 px-4 py-3 shadow-sm border border-warning-subtle bg-warning-subtle text-warning-emphasis">
+                <h5 class="fw-bold mb-2"><i class="bi bi-info-circle me-1"></i> Warning:</h5>
+                <p class="small mb-0">
+                    Deleting this category will not automatically delete your transactions, but it will leave any associated Income or Expense records without a category. This action is permanent and cannot be undone.
+                </p>
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger py-2.5 fs-5 shadow-sm">
+                        <i class="bi bi-trash me-1"></i> Confirm Delete
+                    </button>
+                    <a href="{% url 'category_list' %}" class="btn btn-light py-2.5 text-secondary border">
+                        Cancel and Go Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
